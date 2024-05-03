@@ -5,7 +5,7 @@ import com.medtech.model.alertas.NotificacaoRAM;
 import com.medtech.model.componente.memoria.MonitoramentoMemoria;
 
 public class alertaRAMAltaMain {
-    private static final double VALOR_MEMORIA_ALTA = 0.8;
+    private static final double VALOR_MEMORIA_ALTA = 0.1;
 
     public static void main(String[] args) {
         MonitoramentoMemoria mon1 = new MonitoramentoMemoria();
