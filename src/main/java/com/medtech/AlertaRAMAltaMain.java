@@ -20,7 +20,7 @@ public class alertaRAMAltaMain {
             System.out.println("ALERTA: Uso de memória alto!");
             System.out.printf("Porcentagem de memória em uso: %.2f%%\n", porcentagemEmUso);
 
-            NotificacaoRAM.exibirNotificacao();
+            NotificacaoRAM.exibirJanelaConfirmacao();
         } else {
             System.out.println("Uso de memória dentro do limite.");
         }
