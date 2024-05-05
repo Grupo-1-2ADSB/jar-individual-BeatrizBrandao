@@ -4,7 +4,7 @@ import com.github.britooo.looca.api.group.memoria.Memoria;
 import com.medtech.model.alertas.NotificacaoRAM;
 import com.medtech.model.componente.memoria.MonitoramentoMemoria;
 
-public class alertaRAMAltaMain {
+public class AlertaRAMAltaMain {
     private static final double VALOR_MEMORIA_ALTA = 0.1;
 
     public static void main(String[] args) {
