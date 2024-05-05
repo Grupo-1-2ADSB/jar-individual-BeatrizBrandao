@@ -104,6 +104,7 @@ public class Main {
                         case 3:
                             System.out.println("Você escolheu visualizar Memoria RAM:");
                             System.out.println(memoria01.exibeMemoria());
+                            alertaRAMAltaMain.main(new String[]{});
                             break;
                         case 4:
                             System.out.println("Você escolheu visualizar Rede:");
