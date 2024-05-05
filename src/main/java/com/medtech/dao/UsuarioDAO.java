@@ -19,7 +19,11 @@ public class UsuarioDAO {
 
         Usuario usuario = null;
         try {
-             usuario = conexao.queryForObject("SELECT * FROM usuario WHERE nomeUser = '%s' AND senha = '%s'".formatted(userVerificar, senhaVerificar), new BeanPropertyRowMapper<>(Usuario.class));
+            usuario = conexao.queryForObject(
+                    "SELECT * FROM Usuario WHERE nomeUser = ? AND senha = ?",
+                    new Object[]{userVerificar, senhaVerificar},
+                    new BeanPropertyRowMapper<>(Usuario.class)
+            );
         } catch (Exception e) {
             return usuario;
         }
@@ -30,5 +34,5 @@ public class UsuarioDAO {
 
         return null;
     }
-
 }
+
