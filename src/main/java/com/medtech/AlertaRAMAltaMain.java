@@ -6,7 +6,7 @@ import com.medtech.model.componente.memoria.MonitoramentoMemoria;
 import com.medtech.model.mensagemSlack.ChatGeralAvisoRAMAlta;
 
 public class AlertaRAMAltaMain {
-    private static final double VALOR_MEMORIA_ALTA = 0.8;
+    private static final double VALOR_MEMORIA_ALTA = 0.4;
     private static final double VALOR_MEMORIA_CRITICA = 0.9;
 
     public static void main(String[] args) {
