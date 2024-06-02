@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class MemoryUsageFinisher {
 
-    private static final double ACCEPTABLE_MEMORY_USAGE_PERCENTAGE = 80.0;
+    private static final double ACCEPTABLE_MEMORY_USAGE_PERCENTAGE = 10.0;
     private static final List<String> ESSENTIAL_PROCESSES = Arrays.asList(
             "mysqld.exe", "MySQLWorkbench.exe", "System", "java.exe", "idea64.exe", "smss.exe", "csrss.exe", "wininit.exe", "services.exe", "lsass.exe", "lsm.exe", "svchost.exe", "winlogon.exe", "explorer.exe", "Windows Explorer", "taskhostw.exe", "taskbar.exe", "Taskbar", "shellExperienceHost.exe", "dwm.exe", "Desktop Window Manager", "POWERPNT.EXE", "Microsoft PowerPoint Background Task Handler", "OfficeService.exe"
     );
