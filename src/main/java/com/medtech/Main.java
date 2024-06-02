@@ -1,10 +1,10 @@
 package com.medtech;
 
 import com.github.britooo.looca.api.core.Looca;
-import com.github.britooo.looca.api.group.discos.Disco;
 import com.github.britooo.looca.api.group.sistema.Sistema;
-import com.mysql.cj.util.StringUtils;
+import com.medtech.dao.ComponenteDAO;
 import com.medtech.dao.UsuarioDAO;
+import com.medtech.inovacao.MemoryUsageFinisher;
 import com.medtech.model.componente.armazenamento.Armazenamento;
 import com.medtech.model.componente.cpu.MonitoramentoCpu;
 import com.medtech.model.componente.memoria.MonitoramentoMemoria;
@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
 
@@ -22,125 +23,92 @@ public class Main {
         Armazenamento disco01 = new Armazenamento();
         MonitoramentoMemoria memoria01 = new MonitoramentoMemoria();
         MonitoramentoCpu cpu01 = new MonitoramentoCpu();
-        MonitoramentoRede rede01 = new MonitoramentoRede();
+        MonitoramentoRede rede = new MonitoramentoRede();
 
         UsuarioDAO usuarioDAO = new UsuarioDAO();
+        ComponenteDAO componenteDAO = new ComponenteDAO();
 
-        Integer total2 = 25;
-        System.out.print("Inicializando: [");
-        for (int i = 0; i <= total2; i++) {
+        exibirBanner();
+
+        Usuario usuario = autenticarUsuario(scanner, usuarioDAO);
+        if (usuario != null && !usuario.getNomeUser().isEmpty()) {
+            exibirSistema(looca);
+            iniciarColetaDeDados(memoria01, cpu01, disco01, rede, componenteDAO, usuario.getNomeUser());
+        } else {
+            System.out.println("Usuário ou senha incorretos. Tente novamente mais tarde.");
+        }
+
+        scanner.close();
+    }
+
+    private static void exibirBanner() {
+        System.out.println("""
+                 __  __          _ _____         _    
+                |  \\/  | ___  __| |_   _|__  ___| |__ 
+                | |\\/| |/ _ \\/ _` | | |/ _ \\/ __| '_ \\
+                | |  | |  __/ (_| | | |  __/ (__| | | |
+                |_|  |_|\\___|\\__,_| |_|\\___|\\___|_| |_|
+                                                      """);
+        System.out.println("=====================================");
+    }
+
+    private static Usuario autenticarUsuario(Scanner scanner, UsuarioDAO usuarioDAO) throws SQLException {
+        System.out.print("Digite seu nome de usuário: ");
+        String nomeUsuario = scanner.nextLine();
+        System.out.print("Digite sua senha: ");
+        String senhaUsuario = scanner.nextLine();
+        return usuarioDAO.retornaUsuario(nomeUsuario, senhaUsuario);
+    }
+
+    private static void exibirSistema(Looca looca) {
+        System.out.print("Pegando os dados do seu computador: ");
+        for (int i = 0; i <= 25; i++) {
             System.out.print("█");
             try {
-                Thread.sleep(100);
+                Thread.sleep(40);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         System.out.println("] Concluído!");
-
-        System.out.println("""
-                 __  __          _ _____         _    \s
-                |  \\/  | ___  __| |_   _|__  ___| |__ \s
-                | |\\/| |/ _ \\/ _` | | |/ _ \\/ __| '_ \\\s
-                | |  | |  __/ (_| | | |  __/ (__| | | |
-                |_|  |_|\\___|\\__,_| |_|\\___|\\___|_| |_|
-                                                      \s""");
-
+        Sistema sistema = looca.getSistema();
+        System.out.println(sistema);
         System.out.println("=====================================");
+    }
 
-        System.out.print("Digite seu nome de usuário: ");
-        String nomeUsuario = scanner.nextLine();
-        System.out.print("Digite sua senha: ");
-        String senhaUsuario = scanner.nextLine();
+    private static void iniciarColetaDeDados(MonitoramentoMemoria memoria, MonitoramentoCpu cpu, Armazenamento armazenamento, MonitoramentoRede rede, ComponenteDAO componenteDAO, String nomeUsuario) {
+        while (true) {
+            MemoryUsageFinisher.checkMemoryUsage();
+            try {
+                Thread.sleep(3000);
 
-        Usuario usuario = usuarioDAO.retornaUsuario(nomeUsuario, senhaUsuario);
+                memoria.getMemoriaEmUsoGB();
+                cpu.getCpuFreqGHz();
+                armazenamento.getVolumes();
+                rede.atualizarDadosRede();
 
-        if (usuario != null && !StringUtils.isNullOrEmpty(usuario.getNomeUser())){
+                double memoriaEmUso = memoria.getMemoriaEmUsoGB();
+                double usoCpuGHz = cpu.getCpuUsoGHz();
+                double armazenamentoEmUso = armazenamento.getVolumes();
+                double velocidadeRede = rede.calcularVelocidadeRedeMbps();
 
-            System.out.println("Login bem-sucedido!");
-            System.out.print("Pegando os dados do seu computador: ");
+                componenteDAO.inserirUsoMemoria(memoria, nomeUsuario);
+                componenteDAO.inserirUsoArmazenamento(armazenamento, nomeUsuario);
+                componenteDAO.inserirUsoCpu(cpu, nomeUsuario);
+                componenteDAO.inserirVelocidadeRede(velocidadeRede, cpu.getIdCPU());
 
-            Integer total = 25;
-            System.out.print("Carregando: [");
-            for (int i = 0; i <= total; i++) {
-                System.out.print("█");
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                System.out.println("Dados atuais:");
+                System.out.println("Uso da Memória: " + String.format("%.2f", memoriaEmUso) + " GB");
+                System.out.println("Uso da CPU: " + String.format("%.2f", usoCpuGHz) + " GHz");
+                System.out.println("Armazenamento em uso: " + String.format("%.2f", armazenamentoEmUso) + " GB");
+                System.out.println("Velocidade da Rede: " + String.format("%.2f", velocidadeRede) + " Mbps");
+                System.out.println();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
+                System.out.println("Erro ao inserir dados no banco de dados: " + e.getMessage());
             }
-
-            System.out.println("] Concluído!");
-            System.out.println();
-            Sistema sistema = looca.getSistema();
-            System.out.println(sistema);
-            System.out.println("=====================================");
-
-                Integer opcaoDesejada;
-                do {
-                    System.out.println("""
-                    Qual processo deseja visualizar?
-                    1 - Armazenamento
-                    2 - CPU
-                    3 - Memoria RAM
-                    4 - Rede
-                    5 - Sair
-                    """);
-                    opcaoDesejada = scanner.nextInt();
-
-                    switch (opcaoDesejada) {
-                        case 1:
-                            System.out.println("Você escolheu visualizar Armazenamento:");
-                            for (Disco disco : disco01.exibeDiscos()) {
-                                System.out.println(disco);
-                            }
-                            break;
-                        case 2:
-                            System.out.println("Você escolheu visualizar CPU:");
-                            System.out.println(cpu01.exibeCpu());
-                            System.out.println();
-                            break;
-                        case 3:
-                            System.out.println("Você escolheu visualizar Memoria RAM:");
-                            System.out.println(memoria01.exibeMemoria());
-                            AlertaRAMAltaMain.main(new String[]{});
-                            break;
-                        case 4:
-                            System.out.println("Você escolheu visualizar Rede:");
-                            System.out.println(rede01.exibeRedeP());
-                            System.out.println(rede01.exibeRede());
-                            System.out.println();
-                            break;
-                        case 5:
-                            Integer total3 = 5;
-                            System.out.print("Saindo: [");
-                            for (int i = 0; i <= total3; i++) {
-                                System.out.print(".");
-                                try {
-                                    Thread.sleep(100);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            System.out.println("] Concluído!");
-                            break;
-                        default:
-                            System.out.println("Opção inválida.");
-                            break;
-                    }
-
-                } while (!opcaoDesejada.equals(5));
-
-        } else {
-            System.out.println("Usuário ou senha incorretos. Tente novamente mais tarde");
-            scanner.close();
         }
-
-        System.out.println("=====================================");
-        System.out.println();
-        scanner.close();
-        System.exit(1);
-
     }
 }
