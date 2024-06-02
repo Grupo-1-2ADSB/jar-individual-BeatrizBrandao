@@ -5,10 +5,6 @@ import com.medtech.model.usuario.Usuario;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.sql.SQLException;
-
 public class UsuarioDAO {
     private final ConexaoBanco conexaoBanco;
 
