@@ -18,30 +18,15 @@ public class UsuarioDAO {
 
     public Usuario retornaUsuario(String userVerificar, String senhaVerificar) {
         Usuario usuario = null;
-        try {
-            JdbcTemplate jdbcTemplate = getJdbcTemplate();
-            String query = "SELECT * FROM usuario WHERE nomeUser = ? AND senha = ?";
-            usuario = jdbcTemplate.queryForObject(query, new Object[]{userVerificar, senhaVerificar}, new BeanPropertyRowMapper<>(Usuario.class));
-            return usuario;
-        } catch (Exception ex) {
-            return null; // Falha na autenticação ou no acesso ao banco de dados
+            try {
+                JdbcTemplate sqlServerConexao = conexaoBanco.getSqlServerJdbcTemplate();
+                String query = "SELECT * FROM usuario WHERE nomeUser = ? AND senha = ?";
+                usuario = sqlServerConexao.queryForObject(query, new Object[]{userVerificar, senhaVerificar}, new BeanPropertyRowMapper<>(Usuario.class));
+                return usuario;
+            } catch (Exception ex) {
+                return null; // Falha na autenticação no SQL Server
+            }
         }
     }
 
-    private JdbcTemplate getJdbcTemplate() {
-        if (isInternetAvailable()) {
-            return conexaoBanco.getSqlServerJdbcTemplate();
-        } else {
-            return conexaoBanco.getMysqlJdbcTemplate();
-        }
-    }
 
-    private boolean isInternetAvailable() {
-        try {
-            InetAddress address = InetAddress.getByName("www.google.com");
-            return address.isReachable(1000);
-        } catch (IOException e) {
-            return false;
-        }
-    }
-}
