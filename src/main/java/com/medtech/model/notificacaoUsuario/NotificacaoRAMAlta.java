@@ -55,7 +55,6 @@ public class NotificacaoRAMAlta {
 
         if (!response) {
             System.out.println("Execução interrompida pelo usuário.");
-            System.exit(0);
         }
 
         return response;
