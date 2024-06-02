@@ -18,9 +18,6 @@ public class UsuarioDAO {
 
     public Usuario retornaUsuario(String userVerificar, String senhaVerificar) {
         Usuario usuario = null;
-
-        if (isInternetAvailable()) {
-            // Tenta autenticar no SQL Server se houver conexão com a internet
             try {
                 JdbcTemplate sqlServerConexao = conexaoBanco.getSqlServerJdbcTemplate();
                 String query = "SELECT * FROM usuario WHERE nomeUser = ? AND senha = ?";
@@ -29,25 +26,7 @@ public class UsuarioDAO {
             } catch (Exception ex) {
                 return null; // Falha na autenticação no SQL Server
             }
-        } else {
-            // Tenta autenticar no MySQL local se não houver conexão com a internet
-            try {
-                JdbcTemplate mysqlConexao = conexaoBanco.getMysqlJdbcTemplate();
-                String query = "SELECT * FROM usuario WHERE nomeUser = ? AND senha = ?";
-                usuario = mysqlConexao.queryForObject(query, new Object[]{userVerificar, senhaVerificar}, new BeanPropertyRowMapper<>(Usuario.class));
-                return usuario;
-            } catch (Exception e) {
-                return null; // Falha na autenticação no MySQL local
-            }
         }
     }
 
-    private boolean isInternetAvailable() {
-        try {
-            InetAddress address = InetAddress.getByName("www.google.com");
-            return address.isReachable(1000);
-        } catch (IOException e) {
-            return false;
-        }
-    }
-}
+
